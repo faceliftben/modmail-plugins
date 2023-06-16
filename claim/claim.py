@@ -7,11 +7,11 @@ from core.checks import PermissionLevel
 
 
 class ClaimThread(commands.Cog):
-    """Allows supporters to claim thread by sending claim in the thread channel"""
+    """Ermöglicht es Unterstützern, einen Thread zu beanspruchen, indem sie einen Anspruch im Threadkanal senden"""
     def __init__(self, bot):
         self.bot = bot
         self.db = self.bot.plugin_db.get_partition(self)
-        check_reply.fail_msg = 'This thread has been claimed by another user.'
+        check_reply.fail_msg = 'Dieser Thread wurde von einem anderen Benutzer beansprucht.'
         self.bot.get_command('reply').add_check(check_reply)
         self.bot.get_command('areply').add_check(check_reply)
         self.bot.get_command('fareply').add_check(check_reply)
@@ -24,39 +24,39 @@ class ClaimThread(commands.Cog):
         thread = await self.db.find_one({'thread_id': str(ctx.thread.channel.id)})
         if thread is None:
             await self.db.insert_one({'thread_id': str(ctx.thread.channel.id), 'claimers': [str(ctx.author.id)]})
-            await ctx.send('Claimed')
+            await ctx.send("Ticket wurde übernommen")
         else:
-            await ctx.send('Thread is already claimed')
+            await ctx.send('Ticket ist bereits übernommen worden')
 
     @checks.has_permissions(PermissionLevel.SUPPORTER)
     @checks.thread_only()
     @commands.command()
     async def addclaim(self, ctx, *, member: discord.Member):
-        """Adds another user to the thread claimers"""
+        """Fügt einen weiteren Benutzer zu den Ticket-Beanspruchern hinzu"""
         thread = await self.db.find_one({'thread_id': str(ctx.thread.channel.id)})
         if thread and str(ctx.author.id) in thread['claimers']:
             await self.db.find_one_and_update({'thread_id': str(ctx.thread.channel.id)}, {'$addToSet': {'claimers': str(member.id)}})
-            await ctx.send('Added to claimers')
+            await ctx.send('Zu Anspruchstellern hinzugefügt')
 
     @checks.has_permissions(PermissionLevel.SUPPORTER)
     @checks.thread_only()
     @commands.command()
     async def removeclaim(self, ctx, *, member: discord.Member):
-        """Removes a user from the thread claimers"""
+        """Entfernt einen Benutzer aus den Ticket-Beanspruchern"""
         thread = await self.db.find_one({'thread_id': str(ctx.thread.channel.id)})
         if thread and str(ctx.author.id) in thread['claimers']:
             await self.db.find_one_and_update({'thread_id': str(ctx.thread.channel.id)}, {'$pull': {'claimers': str(member.id)}})
-            await ctx.send('Removed from claimers')
+            await ctx.send('Von Anspruchstellern entfernt')
 
     @checks.has_permissions(PermissionLevel.SUPPORTER)
     @checks.thread_only()
     @commands.command()
     async def transferclaim(self, ctx, *, member: discord.Member):
-        """Removes all users from claimers and gives another member all control over thread"""
+        """Entfernt alle Benutzer von Anspruchstellern und gibt einem anderen Mitglied die gesamte Kontrolle über das Ticket"""
         thread = await self.db.find_one({'thread_id': str(ctx.thread.channel.id)})
         if thread and str(ctx.author.id) in thread['claimers']:
             await self.db.find_one_and_update({'thread_id': str(ctx.thread.channel.id)}, {'$set': {'claimers': [str(member.id)]}})
-            await ctx.send('Added to claimers')
+            await ctx.send('Zu Anspruchstellern hinzugefügt')
 
     @checks.has_permissions(PermissionLevel.MODERATOR)
     @checks.thread_only()
@@ -72,7 +72,7 @@ class ClaimThread(commands.Cog):
     @checks.thread_only()
     @commands.command()
     async def overridereply(self, ctx, *, msg: str=""):
-        """Allow mods to bypass claim thread check in reply"""
+        """Erlaube Mods, die Anspruchs-Thread-Prüfung als Antwort zu umgehen"""
         await ctx.invoke(self.bot.get_command('reply'), msg=msg)
 
 
