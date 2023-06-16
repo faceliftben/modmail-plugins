@@ -6,7 +6,7 @@ from discord.ext import commands
 
 
 class GenLog(commands.Cog):
-    """Sets up a log txt file generator to be sent on thread close"""
+    """Richtet einen Protokoll-TXT-Dateigenerator ein, der beim Schließen des Threads gesendet wird"""
     def __init__(self, bot):
         self.bot = bot
 
@@ -19,17 +19,17 @@ class GenLog(commands.Cog):
             await self.bot.log_channel.send(file=discord.File(f, f"Modmail-Log-{thread.recipient}.txt"))
 
     def get_log_message(self, thread):
-        # From the logviewer's plain text functionality: https://github.com/kyb3r/logviewer/blob/master/core/models.py#L65-L109
+       
         messages = thread["messages"]
         thread_create_time = dateutil.parser.parse(thread["created_at"]).strftime("%d %b %Y - %H:%M UTC")
-        out = f"Thread created at {thread_create_time}\n"
+        out = f"Dieser Ticket-Log wurde mit einem Bot von https://game-paradise.de erstellt.\n\n  ──────────────────────────────────────────────── \n\n[U]: Ticket-Nutzer | [M]: Moderator/Teammitglied \n\n ──────────────────────────────────────────────── \n\nTicket wurde erstellt: {thread_create_time}\n\n"
 
         if thread['creator']['id'] == thread['recipient']['id'] and thread['creator']['mod'] == thread['recipient']['mod']:
-            out += f"[R] {thread['creator']['name']}#{thread['creator']['discriminator']} "
-            out += f"({thread['creator']['id']}) created a Modmail thread. \n"
+            out += f"[U] {thread['creator']['name']}#{thread['creator']['discriminator']} "
+            out += f"({thread['creator']['id']}) hat ein Ticket erstellt. \n"
         else:
             out += f"[M] {thread['creator']['name']}#{thread['creator']['discriminator']} "
-            out += f"created a thread with [R] "
+            out += f"Hat ein Ticket mit [U] eröffnet "
             out += f"{thread['recipient']['name']}#{thread['recipient']['discriminator']} ({thread['recipient']['id']})\n"
 
         out += "────────────────────────────────────────────────\n"
@@ -40,14 +40,14 @@ class GenLog(commands.Cog):
                 curr, next_ = message["author"], messages[next_index]["author"]
 
                 author = curr
-                user_type = "M" if author["mod"] else "R"
+                user_type = "M" if author["mod"] else "U"
                 create_time = dateutil.parser.parse(message["timestamp"]).strftime("%d/%m %H:%M")
 
                 base = f"{create_time} {user_type} "
                 base += f"{author['name']}#{author['discriminator']}: {message['content']}\n"
 
                 for attachment in message["attachments"]:
-                    base += f"Attachment [{attachment['filename']}]: {attachment['url']}\n"
+                    base += f"Datei [{attachment['filename']}]: {attachment['url']}\n"
 
                 out += base
 
@@ -60,10 +60,10 @@ class GenLog(commands.Cog):
                 out += "────────────────────────────────────────────────\n"
 
             out += f"[M] {thread['closer']['name']}#{thread['closer']['discriminator']} ({thread['closer']['id']}) "
-            out += "closed the Modmail thread. \n"
+            out += "hat das Ticket geschlossen. \n"
 
             closed_time = dateutil.parser.parse(thread["closed_at"]).strftime("%d %b %Y - %H:%M UTC")
-            out += f"Thread closed at {closed_time} \n"
+            out += f"Ticket geschlossen um: {closed_time} \n"
 
         return out
 
