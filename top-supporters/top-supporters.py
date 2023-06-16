@@ -10,14 +10,14 @@ from core.time import UserFriendlyTime
 
 
 class TopSupporters(commands.Cog):
-    """Sets up top supporters command in Modmail discord"""
+    """Richtet den Top-Unterstützer-Befehl in Modmail Discord ein"""
     def __init__(self, bot):
         self.bot = bot
 
     @checks.has_permissions(PermissionLevel.ADMINISTRATOR)
     @commands.command()
     async def topsupporters(self, ctx, *, dt: UserFriendlyTime):
-        """Retrieves top supporters for the specified time period"""
+        """Ruft Top-Unterstützer für den angegebenen Zeitraum ab"""
         async with ctx.typing():
             date = discord.utils.utcnow() - (dt.dt - discord.utils.utcnow())
 
@@ -45,8 +45,8 @@ class TopSupporters(commands.Cog):
                     fmt += f'**{n}.** `{u}` - {supporters[k]}\n'
                     n += 1
 
-            em = discord.Embed(title='Active Supporters', description=fmt, timestamp=date, color=0x7588da)
-            em.set_footer(text='Since')
+            em = discord.Embed(title='Aktive Supporter', description=fmt, timestamp=date, color=0x7588da)
+            em.set_footer(text='seit')
             await ctx.send(embed=em)
 
 
